@@ -1,14 +1,26 @@
+from urllib.parse import urlparse
 import psycopg2
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+DATABASE_URL = os.getenv('DATABASE_URL')
 
 def connect_to_db():
-    conn = psycopg2.connect(
-        host="localhost",
-        database="diabetes",
-        user="postgres",
-        password="postgres",
-        port='5432'
-    )
-    return conn
+    url = DATABASE_URL
+    try:
+        result = urlparse(url)
+        conn = psycopg2.connect(
+            dbname=result.path[1:],
+            user=result.username,
+            password=result.password,
+            host=result.hostname,
+            port=result.port
+        )
+        return conn
+    except psycopg2.OperationalError as e:
+        print(f'Could not connect to the database: {e}')
+        return e
 
 def create_tables(conn):
     cur = conn.cursor()
@@ -71,9 +83,9 @@ def create_tables(conn):
 
 def login(conn, email, password):
     cur = conn.cursor()
-    query = """
+    query = '''
         SELECT id, display_name FROM users WHERE email = %s AND password = %s
-    """
+    '''
     params = (email, password)
     cur.execute(query, params)
     user = cur.fetchone()
@@ -87,9 +99,9 @@ def login(conn, email, password):
 
 def verify_email(conn, email):
     cur = conn.cursor()
-    query = """
+    query = '''
         SELECT * FROM users WHERE email = %s
-    """
+    '''
     params = (email,)
     cur.execute(query, params)
     user = cur.fetchone()
@@ -102,9 +114,9 @@ def verify_email(conn, email):
 
 def get_height(conn, user_id):
     cur = conn.cursor()
-    query = """
+    query = '''
         SELECT height FROM users WHERE id = %s
-    """
+    '''
     params = (user_id,)
     cur.execute(query, params)
     height = cur.fetchone()
@@ -113,9 +125,9 @@ def get_height(conn, user_id):
 
 def get_weight(conn, user_id):
     cur = conn.cursor()
-    query = """
+    query = '''
         SELECT weight, datetime FROM weight WHERE user_id = %s ORDER BY datetime ASC
-    """
+    '''
     params = (user_id,)
     cur.execute(query, params)
     weights = cur.fetchall()
@@ -124,9 +136,9 @@ def get_weight(conn, user_id):
 
 def get_glucoses(conn, user_id):
     cur = conn.cursor()
-    query = """
+    query = '''
         SELECT level, datetime FROM glucose WHERE user_id = %s ORDER BY datetime ASC
-    """
+    '''
     params = (user_id,)
     cur.execute(query, params)
     glucoses = cur.fetchall()
@@ -170,10 +182,10 @@ def get_last_glucose(conn, user_id):
 
 def insert_user(conn, email, password, display_name, gender, age, height):
     cur = conn.cursor()
-    query = """
+    query = '''
         INSERT INTO users (email, password, display_name, gender, age, height) 
         VALUES (%s, %s, %s, %s, %s, %s)
-    """
+    '''
     params = (email, password, display_name, gender, age, height)
     cur.execute(query, params)
     conn.commit()
@@ -181,10 +193,10 @@ def insert_user(conn, email, password, display_name, gender, age, height):
 def insert_glucose(conn, record, datetime, user_id):
     cur = conn.cursor()
     
-    query = """
+    query = '''
         INSERT INTO glucose (level, datetime, user_id) 
         VALUES (%s, %s, %s)
-    """
+    '''
     params = (record, datetime, user_id)
     cur.execute(query, params)
     conn.commit()
@@ -192,20 +204,20 @@ def insert_glucose(conn, record, datetime, user_id):
 
 def insert_weight(conn, weight, datetime, user_id):
     cur = conn.cursor()
-    query = """
+    query = '''
         INSERT INTO weight (user_id, weight, datetime) 
         VALUES (%s, %s, %s)
-    """
+    '''
     params = (user_id, weight, datetime)
     cur.execute(query, params)
     conn.commit()
 
 def insert_exercises_user(conn, user_id, exercise_id, title, time_elapsed, calories_total):
     cur = conn.cursor()
-    query = """
+    query = '''
         INSERT INTO exercises_users (user_id, exercise_id, title, time_elapsed, calories_total) 
         VALUES (%s, %s, %s, %s, %s)
-    """
+    '''
     params = (user_id, exercise_id, title, time_elapsed, calories_total)
     cur.execute(query, params)
     conn.commit()
