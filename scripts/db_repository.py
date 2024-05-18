@@ -55,12 +55,12 @@ def create_tables(conn):
 
     cur.execute('''
         CREATE TABLE IF NOT EXISTS exercises_users (
+            id SERIAL PRIMARY KEY,
             user_id SERIAL,
             exercise_id SERIAL,
             title TEXT,
             time_elapsed FLOAT,
             calories_total FLOAT,
-            PRIMARY KEY (user_id, exercise_id),
             FOREIGN KEY (user_id) REFERENCES users(id),
             FOREIGN KEY (exercise_id) REFERENCES exercises(id)
         )
@@ -83,7 +83,6 @@ def login(conn, email, password):
         return False, None
     else:
         user_id, display_name = user
-        print("login result: ", user_id, display_name)
         return user_id, display_name
 
 def verify_email(conn, email):
@@ -101,6 +100,28 @@ def verify_email(conn, email):
     else:
         return False
 
+def get_height(conn, user_id):
+    cur = conn.cursor()
+    query = """
+        SELECT height FROM users WHERE id = %s
+    """
+    params = (user_id,)
+    cur.execute(query, params)
+    height = cur.fetchone()
+    cur.close()
+    return height
+
+def get_weight(conn, user_id):
+    cur = conn.cursor()
+    query = """
+        SELECT weight, datetime FROM weight WHERE user_id = %s ORDER BY datetime ASC
+    """
+    params = (user_id,)
+    cur.execute(query, params)
+    weights = cur.fetchall()
+    cur.close()
+    return weights
+
 def get_glucoses(conn, user_id):
     cur = conn.cursor()
     query = """
@@ -112,10 +133,20 @@ def get_glucoses(conn, user_id):
     cur.close()
     return glucoses
 
-def get_exercises(conn, user_id):
+def get_exercises(conn):
     cur = conn.cursor()
     query = '''
-        SELECT * FROM exercises WHERE user_id = %s
+        SELECT * FROM exercises
+    '''
+    cur.execute(query)
+    exercises = cur.fetchall()
+    cur.close()
+    return exercises
+
+def get_exercises_user(conn, user_id):
+    cur = conn.cursor()
+    query = '''
+        SELECT title, time_elapsed, calories_total FROM exercises_users WHERE user_id = %s
     '''
     params = (user_id,)
     cur.execute(query, params)
@@ -148,8 +179,6 @@ def insert_user(conn, email, password, display_name, gender, age, height):
     conn.commit()
 
 def insert_glucose(conn, record, datetime, user_id):
-    print("user_id at start of insert_glucose: ", user_id)
-
     cur = conn.cursor()
     
     query = """
@@ -161,20 +190,22 @@ def insert_glucose(conn, record, datetime, user_id):
     conn.commit()
     cur.close()
 
-def insert_weight(conn, record):
+def insert_weight(conn, weight, datetime, user_id):
     cur = conn.cursor()
     query = """
-        INSERT INTO weight (id, user_id, weight, datetime) 
-        VALUES (%(id)s, %(user_id)s, %(weight)s, %(datetime)s)
+        INSERT INTO weight (user_id, weight, datetime) 
+        VALUES (%s, %s, %s)
     """
-    cur.execute(query, record)
+    params = (user_id, weight, datetime)
+    cur.execute(query, params)
     conn.commit()
 
-def insert_exercises(conn, exercise):
+def insert_exercises_user(conn, user_id, exercise_id, title, time_elapsed, calories_total):
     cur = conn.cursor()
     query = """
-        INSERT INTO exercises_users (user_id, exercise_id, time_elapsed, calories_total) 
-        VALUES (%(id)s, %(title)s, %(calories)s, %(intensity)s)
+        INSERT INTO exercises_users (user_id, exercise_id, title, time_elapsed, calories_total) 
+        VALUES (%s, %s, %s, %s, %s)
     """
-    cur.execute(query, exercise)
+    params = (user_id, exercise_id, title, time_elapsed, calories_total)
+    cur.execute(query, params)
     conn.commit()

@@ -7,7 +7,6 @@ def fazer_login(email, senha):
     db.create_tables(conn)
     user_id, display_name = db.login(conn, email, senha)
     if user_id:
-        print("first user_id", user_id)
         st.session_state["user_id"] = user_id
         st.session_state["nome"] = display_name
         return True
