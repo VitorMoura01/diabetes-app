@@ -2,6 +2,7 @@ from time import sleep
 from pages.login import fazer_login
 import streamlit as st
 from scripts import db_repository as db
+from scripts import encrypt
 
 def cadastrar_usuario(email, senha, nome, genero, idade, altura):
     if not email or not senha or not nome or not genero or not idade or not altura:
@@ -11,6 +12,9 @@ def cadastrar_usuario(email, senha, nome, genero, idade, altura):
         conn = db.connect_to_db()
         db.create_tables(conn)
         if db.verify_email(conn, email):
+            print(senha)
+            senha = encrypt.handle(senha)
+            print(senha)
             db.insert_user(conn, email, senha, nome, genero, idade, altura)
             return True
         else:
@@ -35,8 +39,9 @@ def pagina_cadastro():
 
     if st.button('Cadastrar'):
         if cadastrar_usuario(email, senha, nome, genero, idade, altura):
-            st.success('Usuário cadastrado com sucesso!')
             if fazer_login(email,senha):
+                st.success('Usuário cadastrado com sucesso!')
+                # st.session_state['is_new_user'] = True
                 st.session_state['logged_in'] = True
                 st.session_state['pagina'] = 'Dashboard'
                 with st.spinner('Carregando...'):

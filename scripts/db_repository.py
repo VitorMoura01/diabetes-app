@@ -78,7 +78,33 @@ def create_tables(conn):
         )
     ''')
 
-    conn.commit()
+    cur.execute('''
+        SELECT COUNT(*) FROM exercises
+    ''')
+    count = cur.fetchone()[0]
+    if count == 0:
+        cur.execute('''
+            INSERT INTO exercises (title, calories, intensity)
+            VALUES
+                ('Corrida', 600, 'Alta'),
+                ('Caminhada', 250, 'Baixa'),
+                ('Natação', 600, 'Alta'),
+                ('Ciclismo', 450, 'Alta'),
+                ('Yoga', 200, 'Baixa'),
+                ('Pular Corda', 600, 'Alta'),
+                ('Musculação', 300, 'Média'),
+                ('Pilates', 200, 'Baixa'),
+                ('Hidroginástica', 300, 'Média'),
+                ('Escalada', 500, 'Alta'),
+                ('Basquete', 450, 'Alta'),
+                ('Vôlei', 300, 'Média'),
+                ('Remo', 600, 'Alta'),
+                ('Boxe', 700, 'Alta'),
+                ('Futebol', 800, 'Alta'),
+                ('Tennis', 400, 'Alta'),
+                ('Crossfit', 700, 'Alta');
+        ''')
+        conn.commit()
     cur.close()
 
 def login(conn, email, password):
@@ -111,6 +137,16 @@ def verify_email(conn, email):
         return True
     else:
         return False
+
+def get_users(conn, user_):
+    cur = conn.cursor()
+    query = '''
+        SELECT id, email, display_name, gender, age, height FROM users
+    '''
+    cur.execute(query)
+    users = cur.fetchall()
+    cur.close()
+    return users
 
 def get_height(conn, user_id):
     cur = conn.cursor()
@@ -145,7 +181,7 @@ def get_glucoses(conn, user_id):
     cur.close()
     return glucoses
 
-def get_exercises(conn):
+def get_exercises(conn, user_id):
     cur = conn.cursor()
     query = '''
         SELECT * FROM exercises
@@ -221,3 +257,25 @@ def insert_exercises_user(conn, user_id, exercise_id, title, time_elapsed, calor
     params = (user_id, exercise_id, title, time_elapsed, calories_total)
     cur.execute(query, params)
     conn.commit()
+
+def delete_exercises(conn):
+    cur = conn.cursor()
+    query = '''
+        DELETE FROM exercises
+    '''
+    cur.execute(query)
+    conn.commit()
+    cur.close()
+
+def delete_tables(conn):
+    cur = conn.cursor()
+    query = '''
+        DROP TABLE IF EXISTS exercises_users CASCADE;
+        DROP TABLE IF EXISTS exercises CASCADE;
+        DROP TABLE IF EXISTS glucose CASCADE;
+        DROP TABLE IF EXISTS users CASCADE;
+        DROP TABLE IF EXISTS weight CASCADE;
+    '''
+    cur.execute(query)
+    conn.commit()
+    cur.close()

@@ -54,11 +54,11 @@ def config():
         }
 
         .stTabs [data-baseweb='tab']:hover {
-            color: lightblue;
+            color: green;
         }
 
         .stTabs [aria-selected='true'] {
-            color: lightblue;
+            color: green;
         }
 
     </style>
