@@ -130,7 +130,7 @@ def exibir_dialog_exercicio():
         st.write("Exercício não selecionado.")
     duracao = st.slider('Duração do exercício (minutos):', 0, 180, step=1)
     calorias_totais = (duracao / 60) * calories[exercise_index]
-    peso = st.number_input('Qual é o seu peso atual?', min_value=0.0, step=0.1)
+    peso = st.number_input('Qual é o seu peso atual?', min_value=0.0, step=0.1, value=65.0)
 
     if st.button('Registrar', use_container_width=True, type='primary'):
         with DBConnection() as conn:
@@ -192,6 +192,10 @@ def pagina_dashboard():
             dados_peso = coletar_dados_corpo()
             exibir_grafico4(dados_peso)
             exibir_grafico3(dados_exercicio)
+    else:
+        with tab2:
+            dados_peso = coletar_dados_corpo()
+            exibir_grafico4(dados_peso)
             
 
     st.divider()

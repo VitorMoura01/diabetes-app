@@ -1,11 +1,14 @@
+from datetime import datetime, timedelta
 from time import sleep
+
+from pytz import timezone
 from pages.login import fazer_login
 import streamlit as st
 from scripts import db_repository as db
 from scripts import encrypt
 
-def cadastrar_usuario(email, senha, nome, genero, idade, altura):
-    if not email or not senha or not nome or not genero or not idade or not altura:
+def cadastrar_usuario(email, senha, nome, genero, idade, altura, peso):
+    if not email or not senha or not nome or not genero or not idade or not altura or not peso:
         st.error('Todos os campos são obrigatórios.')
         return False
     try:
@@ -34,10 +37,15 @@ def pagina_cadastro():
         idade = st.number_input('Idade', min_value=0, value=18)
         genero = st.radio('Selecione o seu gênero', ['Homem', 'Mulher'], index=None)
         altura = st.select_slider('Coloque a sua altura em centímetros', options=range(100, 220), value=160)
-        
+        peso = st.number_input('Qual é o seu peso atual?', min_value=0.0, step=0.1, value=65.0)
+
     if st.button('Cadastrar', type='primary'):
-        if cadastrar_usuario(email, senha, nome, genero, idade, altura):
+        if cadastrar_usuario(email, senha, nome, genero, idade, altura, peso):
             if fazer_login(email,senha):
+                conn = db.connect_to_db()
+                current_time = datetime.now(timezone('America/Sao_Paulo')) + timedelta(minutes=45)
+                db.insert_weight(conn, peso, current_time, st.session_state['user_id'])
+                
                 st.success('Usuário cadastrado com sucesso!')
                 # st.session_state['is_new_user'] = True
                 st.session_state['logged_in'] = True
