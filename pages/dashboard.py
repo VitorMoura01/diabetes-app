@@ -91,9 +91,9 @@ def exibir_grafico4(df):
     df['IMC'] = df['Peso (kg)'] / ((df['Altura (cm)'] / 100) ** 2)
     avg_peso = df['Peso (kg)'].mean()
     if len(df) >= 2:
-        st.metric('IMC (Índice de Massa Corporal)', value=df['IMC'].iloc[-1], delta=(df['IMC'].iloc[-2] - df['IMC'].iloc[-1]))
+        st.metric('IMC (Índice de Massa Corporal)', value=round(df['IMC'].iloc[-1], 3), delta=(round(df['IMC'].iloc[-2], 2) - round(df['IMC'].iloc[-1], 2)))
     elif len(df) == 1:
-        st.metric('IMC (Índice de Massa Corporal)', value=df['IMC'].iloc[-1])
+        st.metric('IMC (Índice de Massa Corporal)', value=round(df['IMC'].iloc[-1], 3))
     else:
         st.write('Sem dados suficientes para cálculo de IMC (Índice de Massa Corporal).')
 
