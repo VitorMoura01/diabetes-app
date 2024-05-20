@@ -63,6 +63,9 @@ def exibir_grafico1(df):
     avg_glucose = df['Glicose (mg/dL)'].mean()
     fig.update_traces(line_color='#208128')
     fig.add_trace(go.Scatter(x=df['Dia'], y=[avg_glucose] * len(df), mode='lines', name='Sua Média de Glicose', line=dict(color='royalblue', width=4, dash='dot')))
+    fig.update_layout(dragmode=False)  # Disable drag mode interactions
+    fig.update_xaxes(fixedrange=True)  # Disable zoom on x-axis
+    fig.update_yaxes(fixedrange=True)  # Disable zoom on y-axis
     st.plotly_chart(fig)
 
 def exibir_grafico2(df):
@@ -75,11 +78,16 @@ def exibir_grafico2(df):
         cols[i].metric(label=f'{status}', value=count)
     fig2 = px.histogram(df, x='Status', title='Distribuição dos Níveis de Glicose')
     fig2.update_traces(marker_color='#208128')
+    fig2.update_layout(dragmode=False)  # Disable drag mode interactions
+    fig2.update_xaxes(fixedrange=True)  # Disable zoom on x-axis
+    fig2.update_yaxes(fixedrange=True)  # Disable zoom on y-axis
     st.plotly_chart(fig2)
 
 def exibir_grafico3(df):
     fig3 = px.bar(df, x='Exercicio', y='Calorias Totais', title='Calorias Gastas por Exercício')
-    fig3.update_traces(marker_color='#208128')
+    fig3.update_layout(dragmode=False)  # Disable drag mode interactions
+    fig3.update_xaxes(fixedrange=True)  # Disable zoom on x-axis
+    fig3.update_yaxes(fixedrange=True)  # Disable zoom on y-axis
     st.plotly_chart(fig3)
 
 def exibir_grafico4(df):
@@ -95,6 +103,9 @@ def exibir_grafico4(df):
     fig4 = px.line(df, x='Dia', y='Peso (kg)', title='Peso ao Longo do Tempo', line_shape='spline')
     fig4.update_traces(line_color='#208128')
     fig4.add_trace(go.Scatter(x=df['Dia'], y=[avg_peso] * len(df), mode='lines', name='Sua Média de Peso', line=dict(color='royalblue', width=4, dash='dot')))
+    fig4.update_layout(dragmode=False)  # Disable drag mode interactions
+    fig4.update_xaxes(fixedrange=True)  # Disable zoom on x-axis
+    fig4.update_yaxes(fixedrange=True)  # Disable zoom on y-axis
     st.plotly_chart(fig4)
 
 @st.experimental_dialog('Registro de hoje📆')
@@ -137,17 +148,12 @@ def pagina_dashboard():
     st.title(f'Olá, :green[{st.session_state.get("nome", "usuário")}] 👋, como vai?')
     with DBConnection() as conn:
         last_glucose = db.get_last_glucose(conn, st.session_state['user_id'])
-        st.write(last_glucose)
 
     btn1, btn2 = st.columns([1, 1])
     if last_glucose[0] is not None:
         last_glucose_time = timezone('America/Sao_Paulo').localize(last_glucose[1])
         current_time = datetime.now(timezone('America/Sao_Paulo'))
         time_difference = abs(current_time - last_glucose_time)
-        print("current: ", current_time)
-        print("last: ", last_glucose_time)
-        print("diff: ", time_difference)
-        print("delta: ", timedelta(hours=1))
 
         with btn1:
             if time_difference < timedelta(hours=1):
