@@ -63,7 +63,7 @@ def exibir_grafico1(df):
     avg_glucose = df['Glicose (mg/dL)'].mean()
     fig.update_traces(line_color='#208128')
     fig.add_trace(go.Scatter(x=df['Dia'], y=[avg_glucose] * len(df), mode='lines', name='Sua Média de Glicose', line=dict(color='royalblue', width=4, dash='dot')))
-    fig.update_layout(dragmode=False)  # Disable drag mode interactions
+    fig.update_layout(dragmode="pan")  # Disable drag mode interactions
     fig.update_xaxes(fixedrange=True)  # Disable zoom on x-axis
     fig.update_yaxes(fixedrange=True)  # Disable zoom on y-axis
     st.plotly_chart(fig)
@@ -78,14 +78,14 @@ def exibir_grafico2(df):
         cols[i].metric(label=f'{status}', value=count)
     fig2 = px.histogram(df, x='Status', title='Distribuição dos Níveis de Glicose')
     fig2.update_traces(marker_color='#208128')
-    fig2.update_layout(dragmode=False)  # Disable drag mode interactions
+    fig2.update_layout(dragmode="pan")  # Disable drag mode interactions
     fig2.update_xaxes(fixedrange=True)  # Disable zoom on x-axis
     fig2.update_yaxes(fixedrange=True)  # Disable zoom on y-axis
     st.plotly_chart(fig2)
 
 def exibir_grafico3(df):
     fig3 = px.bar(df, x='Exercicio', y='Calorias Totais', title='Calorias Gastas por Exercício')
-    fig3.update_layout(dragmode=False)  # Disable drag mode interactions
+    fig3.update_layout(dragmode="pan")  # Disable drag mode interactions
     fig3.update_xaxes(fixedrange=True)  # Disable zoom on x-axis
     fig3.update_yaxes(fixedrange=True)  # Disable zoom on y-axis
     st.plotly_chart(fig3)
@@ -103,7 +103,7 @@ def exibir_grafico4(df):
     fig4 = px.line(df, x='Dia', y='Peso (kg)', title='Peso ao Longo do Tempo', line_shape='spline')
     fig4.update_traces(line_color='#208128')
     fig4.add_trace(go.Scatter(x=df['Dia'], y=[avg_peso] * len(df), mode='lines', name='Sua Média de Peso', line=dict(color='royalblue', width=4, dash='dot')))
-    fig4.update_layout(dragmode=False)  # Disable drag mode interactions
+    fig4.update_layout(dragmode="pan")  # Disable drag mode interactions
     fig4.update_xaxes(fixedrange=True)  # Disable zoom on x-axis
     fig4.update_yaxes(fixedrange=True)  # Disable zoom on y-axis
     st.plotly_chart(fig4)
