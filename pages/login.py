@@ -16,7 +16,7 @@ def fazer_login(email, senha):
         return False
     
 def pagina_login():
-    st.title('Faça login na sua conta da X App')
+    st.title('Faça login na sua conta da GliceControle')
     email = st.text_input('Email:', value='')
     senha = st.text_input('Senha:', type='password', value='')
     

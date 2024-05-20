@@ -37,7 +37,7 @@ def pagina_cadastro():
         genero = st.radio('Selecione o seu gênero', ['Homem', 'Mulher'], index=None)
         altura = st.select_slider('Coloque a sua altura em centímetros', options=range(100, 220), value=160)
 
-    if st.button('Cadastrar'):
+    if st.button('Cadastrar', type='primary'):
         if cadastrar_usuario(email, senha, nome, genero, idade, altura):
             if fazer_login(email,senha):
                 st.success('Usuário cadastrado com sucesso!')

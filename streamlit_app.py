@@ -3,37 +3,14 @@ from pages.cadastro import pagina_cadastro
 from pages.login import pagina_login
 from pages.dashboard import pagina_dashboard
 
-st.set_page_config(page_title='Diabetes App', page_icon='🩸', initial_sidebar_state='collapsed')
+st.set_page_config(page_title='GliceControle', page_icon='🧁', initial_sidebar_state='collapsed')
 
 if 'pagina' not in st.session_state:
     st.session_state['pagina'] = 'Login'
 
 def config():
-    st.markdown(
-        '''
-    <style>
-        [data-testid='collapsedControl'] {
-            display: none
-        }
-    </style>
-    ''',
-        unsafe_allow_html=True,
-    )
-
-    # st.markdown(
-    #     '''
-    #         <style>
-    #             div[data-testid='column'] class='dashboard-button' {
-    #                 width: fit-content !important;
-    #                 flex: unset;
-    #             }
-    #             div[data-testid='column'] class='dashboard-button' {
-    #                 width: fit-content !important;
-    #             }
-    #         </style>
-    #         ''',
-    #             unsafe_allow_html=True)
     
+    #COR DAS TABS
     st.markdown(
         '''
     <style>
@@ -65,6 +42,7 @@ def config():
     ''',
         unsafe_allow_html=True)
     
+    #LINKS ARTIGOS
     st.markdown(
     '''
     <style>
@@ -118,11 +96,7 @@ def main():
             st.rerun()
 
     elif st.session_state['pagina'] == 'Dashboard' and st.session_state['logged_in']:
-        pagina_dashboard()
-
-    elif st.session_state['pagina'] == 'Registro Medicação' and st.session_state['logged_in']:
-        # pagina_registro_medicao()
-        pass    
+        pagina_dashboard()  
 
 if __name__ == '__main__':
     main()

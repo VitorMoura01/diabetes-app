@@ -90,7 +90,7 @@ def exibir_dialog_glicose():
     nivel = st.slider('Nível de glicose (mg/dL):', 70, 180, step=1)
     horario = st.time_input('Horário da medição:', time(11, 50), step=timedelta(minutes=30))
     timestamp = datetime.combine(datetime.today(), horario)
-    if st.button('Registrar'):
+    if st.button('Registrar', use_container_width=True):
         with DBConnection() as conn:
             db.insert_glucose(conn, nivel, timestamp, st.session_state['user_id'])
         # st.session_state['is_new_user'] = False
@@ -112,7 +112,7 @@ def exibir_dialog_exercicio():
     duracao = st.slider('Duração do exercício (minutos):', 0, 180, step=1)
     calorias_totais = (duracao / 60) * calories[exercise_index]
     peso = st.number_input('Qual é o seu peso atual?', min_value=0.0, step=0.1)
-    if st.button('Registrar'):
+    if st.button('Registrar', use_container_width=True):
         with DBConnection() as conn:
             db.insert_exercises_user(conn, st.session_state['user_id'], exercise_index + 1, options[exercise_index], duracao, calorias_totais)
             current_time = datetime.now(timezone('America/Sao_Paulo')) + timedelta(minutes=45)
@@ -140,17 +140,17 @@ def pagina_dashboard():
                 st.button(f'Próxima medição disponível em :red-background[{next_measurement} minutos]', disabled=True)
             else:
                 st.session_state['medicao'] = 'Já chegou a hora de medir novamente!'
-                if st.button('Registrar medição de glicose', type='primary'):
+                if st.button('Registrar medição de glicose', type='primary', use_container_width=True):
                     exibir_dialog_glicose()
     else:
         with btn1:
             st.session_state['medicao'] = '_Vamos medir pela primeira vez?_'
-            if st.button('Registrar medição de glicose', type='primary'):
+            if st.button('Registrar medição de glicose', type='primary', use_container_width=True):
                 exibir_dialog_glicose()
             st.write(st.session_state['medicao'])
 
     with btn2:
-        if st.button('Registrar exercício físico', type='primary'):
+        if st.button('Registrar exercício físico', type='primary', use_container_width=True):
             exibir_dialog_exercicio()
 
     if st.session_state['medicao'] != '_Vamos medir pela primeira vez?_':
@@ -177,12 +177,15 @@ def pagina_dashboard():
 
     st.divider()
     pagina_educacional()
+    st.divider()
+
     if st.button('Sair', key='sair_button', type='primary'):
         st.session_state.clear()
         st.warning('Você saiu da sua conta.')
         st.rerun()
 
     if st.session_state['user_id'] == 1:
+        st.divider()
         if st.button('Apagar lista de exercícios', key='apagar_exercicios_button', type='primary'):
             with DBConnection() as conn:
                 db.delete_exercises(conn)
