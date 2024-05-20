@@ -84,9 +84,7 @@ def exibir_grafico3(df):
 
 def exibir_grafico4(df):
     df['IMC'] = df['Peso (kg)'] / ((df['Altura (cm)'] / 100) ** 2)
-    fig4 = px.line(df, x='Dia', y='Peso (kg)', title='Peso ao Longo do Tempo')
-    fig4.update_traces(line_color='#208128')
-    st.plotly_chart(fig4)
+    avg_peso = df['Peso (kg)'].mean()
     if len(df) >= 2:
         st.metric('IMC (Índice de Massa Corporal)', value=df['IMC'].iloc[-1], delta=(df['IMC'].iloc[-2] - df['IMC'].iloc[-1]))
     elif len(df) == 1:
@@ -94,11 +92,16 @@ def exibir_grafico4(df):
     else:
         st.write('Sem dados suficientes para cálculo de IMC (Índice de Massa Corporal).')
 
+    fig4 = px.line(df, x='Dia', y='Peso (kg)', title='Peso ao Longo do Tempo', line_shape='spline')
+    fig4.update_traces(line_color='#208128')
+    fig4.add_trace(go.Scatter(x=df['Dia'], y=[avg_peso] * len(df), mode='lines', name='Sua Média de Peso', line=dict(color='royalblue', width=4, dash='dot')))
+    st.plotly_chart(fig4)
+
 @st.experimental_dialog('Registro de hoje📆')
 def exibir_dialog_glicose():
     st.write('Registre o resultado da sua última medição de glicose no sangue.')
-    nivel = st.slider('Nível de glicose (mg/dL):', 70, 180, step=1)
-    horario = st.time_input('Horário da medição:', time(11, 50), step=timedelta(minutes=30))
+    nivel = st.slider('Nível de glicose (mg/dL):', 0, 800, step=1)
+    horario = st.time_input('Horário da medição de :green-background[HOJE]:', time(11, 50), step=timedelta(minutes=30))
     timestamp = datetime.combine(datetime.today(), horario)
     if st.button('Registrar', use_container_width=True, type='primary'):
         with DBConnection() as conn:
@@ -134,12 +137,17 @@ def pagina_dashboard():
     st.title(f'Olá, :green[{st.session_state.get("nome", "usuário")}] 👋, como vai?')
     with DBConnection() as conn:
         last_glucose = db.get_last_glucose(conn, st.session_state['user_id'])
+        st.write(last_glucose)
 
     btn1, btn2 = st.columns([1, 1])
     if last_glucose[0] is not None:
         last_glucose_time = timezone('America/Sao_Paulo').localize(last_glucose[1])
-        current_time = datetime.now(timezone('America/Sao_Paulo')) + timedelta(minutes=45)
+        current_time = datetime.now(timezone('America/Sao_Paulo'))
         time_difference = abs(current_time - last_glucose_time)
+        print("current: ", current_time)
+        print("last: ", last_glucose_time)
+        print("diff: ", time_difference)
+        print("delta: ", timedelta(hours=1))
 
         with btn1:
             if time_difference < timedelta(hours=1):
@@ -162,7 +170,7 @@ def pagina_dashboard():
             exibir_dialog_exercicio()
 
     if st.session_state['medicao'] != '_Vamos medir pela primeira vez?_':
-        st.write(f'Última medição de glicose: :green-background[{last_glucose[0]} mg/dL] às :green-background[{last_glucose_time.strftime("%H:%M")}].  _{st.session_state["medicao"]}_.')
+        st.write(f'Última medição de glicose: :green-background[{last_glucose[0]} mg/dL] às :green-background[{last_glucose_time.strftime("%H:%M")}] do dia {last_glucose_time.strftime("%d/%m")}.  _{st.session_state["medicao"]}_')
     st.divider()
 
     tab1, tab2 = st.tabs(['Glicemia🧁', 'Exercícios🏋️'])
@@ -180,8 +188,9 @@ def pagina_dashboard():
             st.subheader('Aqui estão os seus dados de exercícios')
             dados_exercicio = coletar_dados_exercicios_users()
             dados_peso = coletar_dados_corpo()
-            exibir_grafico3(dados_exercicio)
             exibir_grafico4(dados_peso)
+            exibir_grafico3(dados_exercicio)
+            
 
     st.divider()
     pagina_educacional()

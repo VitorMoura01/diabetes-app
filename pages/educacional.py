@@ -39,7 +39,7 @@ def pagina_educacional():
     with col3:
         app(
             "id3",
-            "Diabetes: Exercícios Físicos Recomendados",
+            "Como usar insulina?",
             "Guia essencial: Como usar insulina no tratamento do diabetes.",
             "images/1.png",
             )

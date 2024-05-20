@@ -65,3 +65,5 @@ st.header("Onde Descartar")
 st.write("""
 **Os resíduos devem ser descartados, imediatamente após o uso, em um coletor apropriado para resíduos perfurocortantes, biológicos e químicos.** O coletor é um recipiente rígido e inquebrável, com boca larga e tampa.
 """)
+st.image("images/Descarte.png", use_column_width=True)
+st.image("images/Informativo.png", use_column_width=True)
