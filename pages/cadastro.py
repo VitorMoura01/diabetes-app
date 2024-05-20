@@ -12,9 +12,7 @@ def cadastrar_usuario(email, senha, nome, genero, idade, altura):
         conn = db.connect_to_db()
         db.create_tables(conn)
         if db.verify_email(conn, email):
-            print(senha)
             senha = encrypt.handle(senha)
-            print(senha)
             db.insert_user(conn, email, senha, nome, genero, idade, altura)
             return True
         else:

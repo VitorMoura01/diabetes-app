@@ -173,7 +173,7 @@ def get_weight(conn, user_id):
 def get_glucoses(conn, user_id):
     cur = conn.cursor()
     query = '''
-        SELECT level, datetime FROM glucose WHERE user_id = %s ORDER BY datetime ASC
+        SELECT id, level, datetime FROM glucose WHERE user_id = %s ORDER BY datetime ASC
     '''
     params = (user_id,)
     cur.execute(query, params)
@@ -194,7 +194,7 @@ def get_exercises(conn, user_id):
 def get_exercises_user(conn, user_id):
     cur = conn.cursor()
     query = '''
-        SELECT title, time_elapsed, calories_total FROM exercises_users WHERE user_id = %s
+        SELECT id, title, time_elapsed, calories_total FROM exercises_users WHERE user_id = %s
     '''
     params = (user_id,)
     cur.execute(query, params)

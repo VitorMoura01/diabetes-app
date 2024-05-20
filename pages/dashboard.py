@@ -43,10 +43,10 @@ def coletar_dados(query_func, columns):
         return pd.DataFrame(data, columns=columns).set_index('id')
 
 def coletar_dados_glicemia():
-    return coletar_dados(db.get_glucoses, ['Glicose (mg/dL)', 'Dia'])
+    return coletar_dados(db.get_glucoses, ['id', 'Glicose (mg/dL)', 'Dia'])
 
 def coletar_dados_exercicios_users():
-    return coletar_dados(db.get_exercises_user, ['Exercicio', 'Duracao', 'Calorias Totais'])
+    return coletar_dados(db.get_exercises_user, ['id', 'Exercicio', 'Duracao', 'Calorias Totais'])
 
 def coletar_dados_corpo():
     with DBConnection() as conn:
@@ -59,23 +59,33 @@ def coletar_dados_corpo():
         return df
 
 def exibir_grafico1(df):
-    fig = px.line(df, x='Dia', y='Glicose (mg/dL)', title='Nível de Glicose ao Longo do Tempo')
+    fig = px.line(df, x='Dia', y='Glicose (mg/dL)', title='Nível de Glicose ao Longo do Tempo', line_shape='spline')
     avg_glucose = df['Glicose (mg/dL)'].mean()
-    fig.add_trace(go.Scatter(x=df['Dia'], y=[avg_glucose] * len(df), mode='lines', name='Média de Glicose'))
+    fig.update_traces(line_color='#208128')
+    fig.add_trace(go.Scatter(x=df['Dia'], y=[avg_glucose] * len(df), mode='lines', name='Sua Média de Glicose', line=dict(color='royalblue', width=4, dash='dot')))
     st.plotly_chart(fig)
 
 def exibir_grafico2(df):
     df['Status'] = pd.cut(df['Glicose (mg/dL)'], bins=[0, 70, 100, 125, np.inf], labels=['Baixo', 'Normal', 'Pré-diabético', 'Diabético'], include_lowest=True)
+
+    st.write('**Quantas vezes você esteve em cada nível de glicose:**')
+    cols = st.columns(4)
+    for i, status in enumerate(['Baixo', 'Normal', 'Pré-diabético', 'Diabético']):
+        count = df[df['Status'] == status].shape[0]
+        cols[i].metric(label=f'{status}', value=count)
     fig2 = px.histogram(df, x='Status', title='Distribuição dos Níveis de Glicose')
+    fig2.update_traces(marker_color='#208128')
     st.plotly_chart(fig2)
 
 def exibir_grafico3(df):
     fig3 = px.bar(df, x='Exercicio', y='Calorias Totais', title='Calorias Gastas por Exercício')
+    fig3.update_traces(marker_color='#208128')
     st.plotly_chart(fig3)
 
 def exibir_grafico4(df):
     df['IMC'] = df['Peso (kg)'] / ((df['Altura (cm)'] / 100) ** 2)
     fig4 = px.line(df, x='Dia', y='Peso (kg)', title='Peso ao Longo do Tempo')
+    fig4.update_traces(line_color='#208128')
     st.plotly_chart(fig4)
     if len(df) >= 2:
         st.metric('IMC (Índice de Massa Corporal)', value=df['IMC'].iloc[-1], delta=(df['IMC'].iloc[-2] - df['IMC'].iloc[-1]))
@@ -90,12 +100,11 @@ def exibir_dialog_glicose():
     nivel = st.slider('Nível de glicose (mg/dL):', 70, 180, step=1)
     horario = st.time_input('Horário da medição:', time(11, 50), step=timedelta(minutes=30))
     timestamp = datetime.combine(datetime.today(), horario)
-    if st.button('Registrar', use_container_width=True):
+    if st.button('Registrar', use_container_width=True, type='primary'):
         with DBConnection() as conn:
             db.insert_glucose(conn, nivel, timestamp, st.session_state['user_id'])
         # st.session_state['is_new_user'] = False
         st.success('Medição de glicose registrada com sucesso!')
-        sleep(1)
         st.rerun()
 
 @st.experimental_dialog('Registro de exercícios 🏋️')
@@ -112,15 +121,14 @@ def exibir_dialog_exercicio():
     duracao = st.slider('Duração do exercício (minutos):', 0, 180, step=1)
     calorias_totais = (duracao / 60) * calories[exercise_index]
     peso = st.number_input('Qual é o seu peso atual?', min_value=0.0, step=0.1)
-    if st.button('Registrar', use_container_width=True):
+
+    if st.button('Registrar', use_container_width=True, type='primary'):
         with DBConnection() as conn:
             db.insert_exercises_user(conn, st.session_state['user_id'], exercise_index + 1, options[exercise_index], duracao, calorias_totais)
             current_time = datetime.now(timezone('America/Sao_Paulo')) + timedelta(minutes=45)
             db.insert_weight(conn, peso, current_time, st.session_state['user_id'])
         st.success('Registro de exercício realizado com sucesso!')
-        st.session_state['exercicio'] = 'Medido'
-        sleep(1)
-        st.rerun()
+        # st.rerun()
 
 def pagina_dashboard():
     st.title(f'Olá, :green[{st.session_state.get("nome", "usuário")}] 👋, como vai?')
