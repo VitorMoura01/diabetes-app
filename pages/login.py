@@ -10,6 +10,7 @@ def fazer_login(email, senha):
     user_id, display_name = db.login(conn, email, senha)
     if user_id:
         st.session_state['user_id'] = user_id
+        print('USERID', st.session_state['user_id'])
         st.session_state['nome'] = display_name
         return True
     else:
@@ -25,7 +26,11 @@ def pagina_login():
             st.success('Login realizado com sucesso!')
             # st.session_state['is_new_user'] = False
             st.session_state['logged_in'] = True
-            st.session_state['pagina'] = 'Dashboard'
+            print('USERID', st.session_state['user_id'])
+            if st.session_state['user_id'] == 1:
+                st.session_state['pagina'] = 'Admin'
+            else:
+                st.session_state['pagina'] = 'Dashboard'
             with st.spinner('Carregando...'):
                 sleep(1)
                 st.rerun()

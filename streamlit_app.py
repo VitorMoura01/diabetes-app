@@ -1,4 +1,5 @@
 import streamlit as st
+from pages.admin import pagina_admin
 from pages.cadastro import pagina_cadastro
 from pages.login import pagina_login
 from pages.dashboard import pagina_dashboard
@@ -97,6 +98,9 @@ def main():
 
     elif st.session_state['pagina'] == 'Dashboard' and st.session_state['logged_in']:
         pagina_dashboard()  
+
+    elif st.session_state['pagina'] == 'Admin' and st.session_state['logged_in']:
+        pagina_admin()
 
 if __name__ == '__main__':
     main()

@@ -1,4 +1,5 @@
 from urllib.parse import urlparse
+import pandas as pd
 import psycopg2
 from dotenv import load_dotenv
 import os
@@ -106,6 +107,25 @@ def create_tables(conn):
         ''')
         conn.commit()
     cur.close()
+
+def get_all_tables(conn):
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT table_name FROM information_schema.tables
+        WHERE table_schema='public'
+    """)
+    tables = cur.fetchall()
+    cur.close()
+    return [table[0] for table in tables]
+
+def fetch_table_data(conn, table_name):
+    cur = conn.cursor()
+    query = f'SELECT * FROM {table_name}'
+    cur.execute(query)
+    rows = cur.fetchall()
+    colnames = [desc[0] for desc in cur.description]
+    cur.close()
+    return pd.DataFrame(rows, columns=colnames)
 
 def login(conn, email, password):
     cur = conn.cursor()
@@ -226,6 +246,23 @@ def insert_user(conn, email, password, display_name, gender, age, height):
     cur.execute(query, params)
     conn.commit()
 
+def delete_user_by_id(conn, user_id):
+    cur = conn.cursor()
+    params = (user_id,)
+    # Delete associated records from the 'weight' table
+    query = "DELETE FROM weight WHERE user_id = %s"
+    cur.execute(query, params)
+    # Delete associated records from the 'glucose' table
+    query = "DELETE FROM glucose WHERE user_id = %s"
+    cur.execute(query, params)
+    # Delete associated records from the 'exercises_users' table
+    query = "DELETE FROM exercises_users WHERE user_id = %s"
+    cur.execute(query, params)
+    # Delete the user
+    query = "DELETE FROM users WHERE id = %s"
+    cur.execute(query, params)
+    conn.commit()
+
 def insert_glucose(conn, record, datetime, user_id):
     cur = conn.cursor()
     
@@ -255,6 +292,25 @@ def insert_exercises_user(conn, user_id, exercise_id, title, time_elapsed, calor
         VALUES (%s, %s, %s, %s, %s)
     '''
     params = (user_id, exercise_id, title, time_elapsed, calories_total)
+    cur.execute(query, params)
+    conn.commit()
+
+def insert_exercise(conn, title, calories, intensity):
+    cur = conn.cursor()
+    query = '''
+        INSERT INTO exercises (title, calories, intensity) 
+        VALUES (%s, %s, %s)
+    '''
+    params = (title, calories, intensity)
+    cur.execute(query, params)
+    conn.commit()
+
+def delete_exercise_by_id(conn, exercise_id):
+    cur = conn.cursor()
+    query = '''
+        DELETE FROM exercises WHERE id = %s
+    '''
+    params = (exercise_id,)
     cur.execute(query, params)
     conn.commit()
 

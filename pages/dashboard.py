@@ -206,30 +206,3 @@ def pagina_dashboard():
         st.session_state.clear()
         st.warning('Você saiu da sua conta.')
         st.rerun()
-
-    if st.session_state['user_id'] == 1:
-        st.divider()
-        if st.button('Apagar lista de exercícios', key='apagar_exercicios_button', type='primary'):
-            with DBConnection() as conn:
-                db.delete_exercises(conn)
-                st.write('Lista de exercícios apagada com sucesso.')
-                st.rerun()
-        if st.button('Apagar lista de usuários', key='apagar_usuarios_button', type='primary'):
-            with DBConnection() as conn:
-                db.delete_users(conn)
-                st.write('Lista de usuários apagada com sucesso.')
-        if st.button('Apagar banco de dados', key='apagar_db_button', type='primary'):
-            with DBConnection() as conn:
-                db.delete_tables(conn)
-                st.session_state.clear()
-                st.write('Banco de dados apagado com sucesso.')
-                st.rerun()
-
-        with DBConnection() as conn:
-            users_list = coletar_dados(db.get_users, ['id', 'email', 'display_name', 'gender', 'age', 'height'])
-            exercises_list = coletar_dados(db.get_exercises, ['id', 'title', 'calories', 'intensity'])
-            st.write('Usuários cadastrados:')
-            st.write(users_list)
-            st.write('Exercícios cadastrados:')
-            st.write(exercises_list)
-        
